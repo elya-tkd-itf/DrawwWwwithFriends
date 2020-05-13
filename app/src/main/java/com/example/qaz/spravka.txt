@@ -1,0 +1,3 @@
+Parametri, peredausiesya v FetchItemTask:
+1 - logIn
+2 - registration

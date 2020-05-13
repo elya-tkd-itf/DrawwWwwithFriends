@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">DrawwWwwithFriends</string>
+    <string name="but_login">LogIn</string>
+    <string name="but_reg">Registration</string>
+    <string name="but_add_group">Add</string>
+    <string name="edit_login">Username</string>
+    <string name="edit_pass">Password</string>
+    <string name="image">Image button</string>
+    <string name="title_activity_my_groups">MyGroupsActivity</string>
+    <string name="label_add_group">Add new group</string>
+    <string name="label_add_user">Add new user</string>
+    <string name="label_add_desk">Add new desk</string>
+    <string name="edit_name_of_new_group">Name of new group</string>
+    <string name="edit_name_of_new_user">Login of new user</string>
+    <string name="edit_name_of_new_desk">Name of new desk</string>
+</resources>
