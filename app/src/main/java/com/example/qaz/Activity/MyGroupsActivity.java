@@ -127,6 +127,7 @@ public class MyGroupsActivity extends AppCompatActivity {
         protected void onPostExecute(List<Group> groups){
             myGroups = groups;
             setupAdapter();
+            updCan();
         }
     }
 
@@ -174,7 +175,8 @@ public class MyGroupsActivity extends AppCompatActivity {
             }
         }
     }
-
+    private boolean can = true;
+    public void updCan(){can = !can;}
     class MyThread extends Thread{
         private volatile boolean running = true;
 
@@ -184,10 +186,14 @@ public class MyGroupsActivity extends AppCompatActivity {
 
         @Override
         public void run() {
+            can = true;
             while (running) {
-                new MyGroupsActivity.FetchItemTask().execute();
+                if (can){
+                    updCan();
+                    new MyGroupsActivity.FetchItemTask().execute();
+                }
                 try {
-                    Thread.sleep(5000);
+                    Thread.sleep(3000);
                 } catch (Exception e) {
                     e.getStackTrace();
                 }

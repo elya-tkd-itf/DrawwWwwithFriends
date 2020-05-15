@@ -86,8 +86,8 @@ public class LogInMenuActivity extends AppCompatActivity{
             MakeRequest maker = new MakeRequest();
             Request request = maker.Empty();
             switch (state){
-                case "1": request = maker.LogIn(username, password); break;
-                case "2": request = maker.Register(username, password); break;
+                case "1": request = maker.LogIn(username, String.valueOf(password.hashCode())); break;
+                case "2": request = maker.Register(username, String.valueOf(password.hashCode())); break;
             }
             try {
                 Response response = client.newCall(request).execute();

@@ -61,7 +61,7 @@ public class AddNewDeskActivity extends AppCompatActivity {
             OkHttpClient client = new OkHttpClient();
             MakeRequest maker = new MakeRequest();
             Resources resources = getResources();
-            Bitmap bitmap = BitmapFactory.decodeResource(resources, R.mipmap.head);
+            Bitmap bitmap = BitmapFactory.decodeResource(resources, R.mipmap.white);
             Request request = maker.AddNewDesk(name, id_g, Base64Converter.BitmapToBase64(bitmap));
             Log.e("s", "s");
             String text = "";

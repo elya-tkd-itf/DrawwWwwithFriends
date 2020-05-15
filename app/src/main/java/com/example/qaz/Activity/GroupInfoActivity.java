@@ -130,7 +130,7 @@ public class GroupInfoActivity extends AppCompatActivity {
     private class FetchItemTask extends AsyncTask<Void, Void, List<String>> {
 
         @Override
-        protected List<String> doInBackground(Void... voids) {
+        protected synchronized List<String> doInBackground(Void... voids) {
             OkHttpClient client = new OkHttpClient();
             MakeRequest maker = new MakeRequest();
             Request request = maker.GetUsers(id_g);
@@ -146,11 +146,14 @@ public class GroupInfoActivity extends AppCompatActivity {
             return users;
         }
         @Override
-        protected void onPostExecute(List<String> users){
+        protected synchronized void onPostExecute(List<String> users){
             usernames = users;
             setupAdapter();
+            updCan();
         }
     }
+    private boolean can = true;
+    public void updCan(){can = !can;}
 
     class MyThread extends Thread{
         private volatile boolean running = true;
@@ -161,10 +164,14 @@ public class GroupInfoActivity extends AppCompatActivity {
 
         @Override
         public void run() {
+            can = true;
             while (running) {
-                new GroupInfoActivity.FetchItemTask().execute();
+                if (can) {
+                    updCan();
+                    new GroupInfoActivity.FetchItemTask().execute();
+                }
                 try {
-                    Thread.sleep(5000);
+                    Thread.sleep(3000);
                 } catch (Exception e) {
                     e.getStackTrace();
                 }

@@ -6,93 +6,102 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.os.AsyncTask;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 
 import androidx.annotation.Nullable;
 
-import java.io.IOException;
-
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MyImageView extends androidx.appcompat.widget.AppCompatImageView{
-    Paint mPaint;
+    List<Paint> mPaint = new ArrayList<>();
+    int nowPaint = 0;
     Bitmap mBitmap;
     Canvas mCanvas;
-    Path mPath;
+    List<Line> mLine = new ArrayList<>();
     Paint mBitmapPaint;
     int id_d;
 
     public MyImageView(Context context) {
         super(context);
-        mPaint = new Paint();
-        mPaint.setAntiAlias(true);
-        mPaint.setDither(true);
-        mPaint.setColor(Color.WHITE);
-        mPaint.setStyle(Paint.Style.STROKE);
-        mPaint.setStrokeJoin(Paint.Join.ROUND);
-        mPaint.setStrokeCap(Paint.Cap.ROUND);
-        mPaint.setStrokeWidth(20);
-
-        mPath = new Path();
-        mBitmapPaint = new Paint();
-        mBitmapPaint.setColor(Color.RED);
+        init_all();
     }
-
     public MyImageView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
-        mPaint = new Paint();
-        mPaint.setAntiAlias(true);
-        mPaint.setDither(true);
-        mPaint.setColor(0xFFFF0000);
-        mPaint.setStyle(Paint.Style.STROKE);
-        mPaint.setStrokeJoin(Paint.Join.ROUND);
-        mPaint.setStrokeCap(Paint.Cap.ROUND);
-        mPaint.setStrokeWidth(20);
-
-        mPath = new Path();
-        mBitmapPaint = new Paint();
-        mBitmapPaint.setColor(Color.RED);
+        init_all();
     }
 
-    public void setId_d(int id_d) {
-        this.id_d = id_d;
+    public void init_all(){
+        for (int i = 0; i < 4; i++) {
+            this.mPaint.add(new Paint());
+            this.mPaint.get(i).setAntiAlias(true);
+            this.mPaint.get(i).setDither(true);
+            this.mPaint.get(i).setStyle(Paint.Style.STROKE);
+            this.mPaint.get(i).setStrokeJoin(Paint.Join.ROUND);
+            this.mPaint.get(i).setStrokeCap(Paint.Cap.ROUND);
+            this.mPaint.get(i).setStrokeWidth(20);
+        }
+        this.mPaint.get(0).setColor(Color.BLUE);
+        this.mPaint.get(1).setColor(Color.GREEN);
+        this.mPaint.get(2).setColor(Color.RED);
+        this.mPaint.get(3).setColor(Color.YELLOW);
+        this.mBitmapPaint = new Paint();
+        this.mBitmapPaint.setColor(Color.RED);
+    }
+
+
+
+    public void setId_d(int id) {
+        this.id_d = id;
     }
 
     public Bitmap getmBitmap() {
         return mBitmap;
     }
 
-    public void setmBitmap(Bitmap mBitmap) {
-        this.mBitmap = mBitmap;
+    public void setmBitmap(Bitmap bitmap) {
+        this.mBitmap = bitmap;
     }
 
-    public void setmPaint(String color){
+    public void setnowPaint(String color){
         switch (color){
-            case "red": mPaint.setColor(Color.RED); break;
-            case "green": mPaint.setColor(Color.GREEN); break;
-            case "yellow": mPaint.setColor(Color.YELLOW); break;
-            case "blue": mPaint.setColor(Color.BLUE); break;
+            case "red": this.nowPaint = 2; break;
+            case "green": this.nowPaint = 1; break;
+            case "yellow": this.nowPaint = 3; break;
+            case "blue": this.nowPaint = 0; break;
         }
+    }
+
+    public void canvasDrawPath(){
+        for (int i = 0; i < this.mLine.size(); i++){
+            Line line = this.mLine.get(i);
+            this.mCanvas.drawPath(line.path, line.paint);
+        }
+    }
+
+    public void setmCanvas() {
+        this.mCanvas = new Canvas(this.mBitmap);
     }
 
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
-        Bitmap workingBitmap = Bitmap.createScaledBitmap(mBitmap, w, h, true);
-        mBitmap = workingBitmap.copy(Bitmap.Config.ARGB_8888, true);
+        Bitmap workingBitmap = Bitmap.createScaledBitmap(this.mBitmap, w, h, true);
+        this.mBitmap = workingBitmap.copy(Bitmap.Config.ARGB_8888, true);
         //mBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
-        mCanvas = new Canvas(mBitmap);
+        this.mCanvas = new Canvas(this.mBitmap);
     }
+
     @Override
     public void draw(Canvas canvas) {
         // TODO Auto-generated method stub
         super.draw(canvas);
-        canvas.drawBitmap(mBitmap, 0, 0, mBitmapPaint);
-        canvas.drawPath(mPath, mPaint);
+        canvas.drawBitmap(this.mBitmap, 0, 0, this.mBitmapPaint);
+        for (int i = 0; i < this.mLine.size(); i++){
+            Line line = this.mLine.get(i);
+            this.mCanvas.drawPath(line.path, line.paint);
+        }
     }
 
     private float mX, mY;
@@ -100,25 +109,30 @@ public class MyImageView extends androidx.appcompat.widget.AppCompatImageView{
 
     private void touch_start(float x, float y) {
         //mPath.reset();
-        mPath.moveTo(x, y);
-        mX = x;
-        mY = y;
+        Line line = new Line();
+        line.paint = this.mPaint.get(this.nowPaint);
+        line.path = new Path();
+        line.path.moveTo(x, y);
+        this.mLine.add(line);
+        this.mX = x;
+        this.mY = y;
     }
     private void touch_move(float x, float y) {
         float dx = Math.abs(x - mX);
         float dy = Math.abs(y - mY);
         if (dx >= TOUCH_TOLERANCE || dy >= TOUCH_TOLERANCE) {
-            mPath.quadTo(mX, mY, (x + mX)/2, (y + mY)/2);
-            mX = x;
-            mY = y;
+            this.mLine.get(this.mLine.size()-1).path.quadTo(mX, mY, (x + mX)/2, (y + mY)/2);
+            this.mX = x;
+            this.mY = y;
         }
     }
     private void touch_up() {
-        mPath.lineTo(mX, mY);
-        mCanvas.drawPath(mPath, mPaint);
-        //mPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SCREEN));
-        mPath.reset();
-        new MyImageView.SetImage().execute();
+        this.mLine.get(this.mLine.size()-1).path.lineTo(mX, mY);
+        for (int i = 0; i < this.mLine.size(); i++){
+            Line line = this.mLine.get(i);
+            this.mCanvas.drawPath(line.path, line.paint);
+        }
+        //mPath.reset();
     }
 
     @Override
@@ -143,21 +157,4 @@ public class MyImageView extends androidx.appcompat.widget.AppCompatImageView{
         return true;
     }
 
-    private class SetImage extends AsyncTask<Void, Void, Void> {
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            OkHttpClient client = new OkHttpClient();
-            MakeRequest maker = new MakeRequest();
-            Bitmap bitmap = mBitmap;
-            String base64 = Base64Converter.BitmapToBase64(bitmap);
-            Request request = maker.SetImage(base64, id_d);
-            try {
-                Response response = client.newCall(request).execute();
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-            return null;
-        }
-    }
 }

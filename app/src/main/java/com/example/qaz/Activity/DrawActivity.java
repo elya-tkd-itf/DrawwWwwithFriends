@@ -47,17 +47,13 @@ public class DrawActivity extends AppCompatActivity {
         setContentView(R.layout.draw_menu);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         initViews();
-    }
-    @Override
-    protected void onPause() {
-        super.onPause();
-        myThread.setRunning(false);
-    }
-    @Override
-    protected void onResume(){
-        super.onResume();
         myThread = new MyThread();
         myThread.start();
+    }
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        myThread.setRunning(false);
     }
 
     protected void initViews() {
@@ -74,38 +70,36 @@ public class DrawActivity extends AppCompatActivity {
         red.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                imageView.setmPaint("red");
+                imageView.setnowPaint("red");
             }
         });
         green = (Button) findViewById(R.id.but_green);
         green.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                imageView.setmPaint("green");
+                imageView.setnowPaint("green");
             }
         });
         yellow = (Button) findViewById(R.id.but_yellow);
         yellow.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                imageView.setmPaint("yellow");
+                imageView.setnowPaint("yellow");
             }
         });
         blue = (Button) findViewById(R.id.but_blue);
         blue.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                imageView.setmPaint("blue");
+                imageView.setnowPaint("blue");
             }
         });
-
-        //new DrawActivity.SetImage().execute();
-        //new DrawActivity.GetImage().execute();
     }
 
-    private class GetImage extends AsyncTask<Void, Void, Void> {
+    public class GetSetImage extends AsyncTask<Void, Void, Void> {
+        @SuppressLint("WrongThread")
         @Override
-        protected Void doInBackground(Void... voids) {
+        protected synchronized Void doInBackground(Void... voids) {
             OkHttpClient client = new OkHttpClient();
             MakeRequest maker = new MakeRequest();
             Request request = maker.GetImage(id_d);
@@ -117,28 +111,26 @@ public class DrawActivity extends AppCompatActivity {
                 ex.printStackTrace();
             }
             Bitmap bitmap = Base64Converter.Base64ToBitMap(base64);
-            imageView.setmBitmap(bitmap);
-            return null;
-        }
-    }
-    private class SetImage extends AsyncTask<Void, Void, Void> {
+            Bitmap muBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
 
-        @Override
-        protected Void doInBackground(Void... voids) {
-            OkHttpClient client = new OkHttpClient();
-            MakeRequest maker = new MakeRequest();
-            @SuppressLint("WrongThread") Bitmap bitmap = imageView.getmBitmap();
-            String base64 = Base64Converter.BitmapToBase64(bitmap);
-            Request request = maker.SetImage(base64, id_d);
+            //imageView.setImageBitmap(muBitmap);
+            //imageView.setmBitmap(muBitmap);
+            //imageView.setmCanvas();
+            //imageView.canvasDrawPath();
+
+            base64 = Base64Converter.BitmapToBase64(imageView.getmBitmap());
+            request = maker.SetImage(base64, id_d);
             try {
                 Response response = client.newCall(request).execute();
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
+            updCan();
             return null;
         }
     }
-
+    private boolean can = true;
+    public void updCan(){can = !can;}
     class MyThread extends Thread{
         private volatile boolean running = true;
 
@@ -148,8 +140,12 @@ public class DrawActivity extends AppCompatActivity {
 
         @Override
         public void run() {
+            can = true;
             while (running) {
-                //new DrawActivity.GetImage().execute();
+                if (can){
+                    updCan();
+                    new DrawActivity.GetSetImage().execute();
+                }
                 try {
                     Thread.sleep(1000);
                 } catch (Exception e) {

@@ -159,7 +159,7 @@ public class GroupMenuActivity extends AppCompatActivity {
     private class FetchItemTask extends AsyncTask<Void, Void, List<Desk>> {
 
         @Override
-        protected List<Desk> doInBackground(Void... voids) {
+        protected synchronized List<Desk> doInBackground(Void... voids) {
             OkHttpClient client = new OkHttpClient();
             MakeRequest maker = new MakeRequest();
             Request request = maker.GetDesks(group.getId_g());
@@ -189,11 +189,14 @@ public class GroupMenuActivity extends AppCompatActivity {
             return desks;
         }
         @Override
-        protected void onPostExecute(List<Desk> desks){
+        protected synchronized void onPostExecute(List<Desk> desks){
             myDesks = desks;
             setupAdapter();
+            updCan();
         }
     }
+    private boolean can = true;
+    public void updCan(){can = !can;}
 
     class MyThread extends Thread{
         private volatile boolean running = true;
@@ -204,10 +207,14 @@ public class GroupMenuActivity extends AppCompatActivity {
 
         @Override
         public void run() {
+            can = true;
             while (running) {
-                new GroupMenuActivity.FetchItemTask().execute();
+                if (can){
+                    updCan();
+                    new GroupMenuActivity.FetchItemTask().execute();
+                }
                 try {
-                    Thread.sleep(5000);
+                    Thread.sleep(3000);
                 } catch (Exception e) {
                     e.getStackTrace();
                 }
